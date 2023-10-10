@@ -47,8 +47,8 @@ class PessoaController extends AbstractController
 
 
 
-            return $this->json(['mensagem' => 'Criado com sucesso'], 201, ['Location' => "/pessoas/{$pessoa->getId()}"]);
-            //header('Location: /pessoas/123', true, 201);
+            //return $this->json(['mensagem' => 'Criado com sucesso'], 201, ['Location' => "/pessoas/{$pessoa->getId()}"]);
+            header("Location: /pessoas/{$pessoa->getId()}", true, 201);
             exit;
         } 
         catch(UniqueConstraintViolationException $unqueException) {
@@ -65,8 +65,13 @@ class PessoaController extends AbstractController
     #[Route('/pessoas/{id}', name: 'app_consulta_pessoa')]
     public function consutaPessoaById(string $id, PessoaRepository $pessoaRepository): JsonResponse
     {
-        $pessoa = $pessoaRepository->find($id);
-        return $this->json(['id' => $pessoa->getId()], 200);
+        try {
+            $pessoa = $pessoaRepository->find($id);
+            if($pessoa == null) throw new Exception("Pessoa não existe");
+            return $this->json(['id' => $pessoa->getId()], 200);
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage()], 404);
+        }
     }
 
     #[Route('/contagem-pessoas', name: 'app_consulta_pessoa_count')]
