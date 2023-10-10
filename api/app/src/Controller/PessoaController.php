@@ -5,6 +5,7 @@ use App\Entity\Pessoa;
 use App\Repository\PessoaRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,8 @@ class PessoaController extends AbstractController
 
         try {
             $payload = $request->toArray();
+
+            $data = new \DateTime($payload['nascimento']);
             
             if(
                 empty($payload['apelido']) or 
@@ -54,6 +57,9 @@ class PessoaController extends AbstractController
         catch(JsonException $jsonException) {
             return $this->json(['mensagem' => 'Payload não é um Json.'], 400);
         }
+        catch(Exception $e) {
+            return $this->json(['mensagem' => 'Payload inválido.'], 422);
+        }
     }
 
     #[Route('/pessoas/{id}', name: 'app_consulta_pessoa')]
@@ -61,6 +67,13 @@ class PessoaController extends AbstractController
     {
         $pessoa = $pessoaRepository->find($id);
         return $this->json(['id' => $pessoa->getId()], 200);
+    }
+
+    #[Route('/contagem-pessoas', name: 'app_consulta_pessoa_count')]
+    public function contagemPessoas( PessoaRepository $pessoaRepository): JsonResponse
+    {
+        $pessoas = $pessoaRepository->findAll();
+        return $this->json(['total' => count($pessoas)], 200);
     }
 
     private function is_array_strings($arr): bool

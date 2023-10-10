@@ -19,7 +19,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.4'
+          cpus: '0.5'
           memory: '0.7GB'
 
   api02: # API - Instância 02
@@ -40,7 +40,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.4'
+          cpus: '0.5'
           memory: '0.7GB'
 
   nginx: # Load Balancer
@@ -64,17 +64,19 @@ services:
     image: mysql:8.0
     hostname: db
     #network_mode: host
+    command: [ "--max_connections=500" ]
     environment:
       MYSQL_ROOT_PASSWORD: root 
       MYSQL_DATABASE: rinhadb
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      #- ./api/.docker/mysql/my.conf:/etc/mysql/my.cnf
     ports:
        - 3306:3306
     deploy:
       resources:
         limits:
-          cpus: '0.6'
+          cpus: '0.5'
           memory: '1.1GB'
 
 networks:
