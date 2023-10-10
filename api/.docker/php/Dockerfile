@@ -32,5 +32,7 @@ RUN usermod -u 1000 www-data
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0"
 #COPY docker/php/uploads.ini /usr/local/etc/php/conf.d
 COPY api/.docker/php/opcache.ini "$PHP_INI_DIR/conf.d"
+#COPY api/.docker/php/php-fpm-custom.conf "$PHP_INI_DIR/conf.d"
+#COPY api/.docker/php/php-fpm-custom.conf /usr/local/etc/php-fpm.d
 
-WORKDIR /usr/src/api
+WORKDIR /usr/src/api/app
