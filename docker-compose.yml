@@ -43,6 +43,7 @@ services:
           cpus: '0.6'
           memory: '0.7GB'
 
+
   nginx: # Load Balancer
     image: nginx:1.15.3-alpine
     volumes:
@@ -57,8 +58,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: '0.4GB'
+          cpus: "0.25"
+          memory: "0.5GB"
 
   db: # Banco de dados
     image: mysql:8.0

@@ -19,6 +19,10 @@ class PessoaController extends AbstractController
     public function criaPessoa(Request $request, EntityManagerInterface $em) : JsonResponse
     {
 
+        // header("Location: /pessoas/123", true, 201);
+        //     exit;
+            
+
         try {
             $payload = $request->toArray();
 
@@ -39,7 +43,7 @@ class PessoaController extends AbstractController
             $pessoa->setApelido($payload['apelido'])
                 ->setNome($payload['nome'])
                 ->setNascimento(new \DateTime($payload['nascimento']))
-                ->setStack($payload['stack']);
+                ->setStack(is_array($payload['stack']) ? $payload['stack'] : null);
                
 
                 $em->persist($pessoa);
@@ -65,6 +69,7 @@ class PessoaController extends AbstractController
     #[Route('/pessoas/{id}', name: 'app_consulta_pessoa')]
     public function consutaPessoaById(string $id, PessoaRepository $pessoaRepository): JsonResponse
     {
+        //return $this->json([], 200);
         try {
             $pessoa = $pessoaRepository->find($id);
             if($pessoa == null) throw new Exception("Pessoa não existe");
