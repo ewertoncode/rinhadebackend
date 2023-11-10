@@ -37,11 +37,11 @@ services:
     user: 1000:1000
     volumes:
       - "./api/app:/usr/src/api/app"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.6'
-          memory: '0.7GB'
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.6'
+    #       memory: '0.7GB'
 
 
   nginx: # Load Balancer
@@ -55,11 +55,11 @@ services:
     ports:
        - "9999:9999"
     #network_mode: host
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: "0.5GB"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.25"
+    #       memory: "0.5GB"
 
   db: # Banco de dados
     image: mysql:8.0

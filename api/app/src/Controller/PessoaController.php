@@ -19,8 +19,8 @@ class PessoaController extends AbstractController
     public function criaPessoa(Request $request, EntityManagerInterface $em) : JsonResponse
     {
 
-        // header("Location: /pessoas/123", true, 201);
-        //     exit;
+        //header("Location: /pessoas/123", true, 201);
+        //    exit;
             
 
         try {
@@ -69,7 +69,7 @@ class PessoaController extends AbstractController
     #[Route('/pessoas/{id}', name: 'app_consulta_pessoa')]
     public function consutaPessoaById(string $id, PessoaRepository $pessoaRepository): JsonResponse
     {
-        //return $this->json([], 200);
+       // return $this->json([], 200);
         try {
             $pessoa = $pessoaRepository->find($id);
             if($pessoa == null) throw new Exception("Pessoa não existe");
