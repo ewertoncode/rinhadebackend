@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class PessoaController extends AbstractController
 {
@@ -38,21 +40,33 @@ class PessoaController extends AbstractController
                 return $this->json(['mensagem' => 'Dados inválidos inválido'], 422);
             }
             
-
             $pessoa = new Pessoa();
             $pessoa->setApelido($payload['apelido'])
-                ->setNome($payload['nome'])
-                ->setNascimento(new \DateTime($payload['nascimento']))
-                ->setStack(is_array($payload['stack']) ? $payload['stack'] : null);
-               
+                    ->setNome($payload['nome'])
+                    ->setNascimento(new \DateTime($payload['nascimento']))
+                    ->setStack(is_array($payload['stack']) ? $payload['stack'] : null);
+                
 
-                $em->persist($pessoa);
-                $em->flush();
+            $em->persist($pessoa);
 
+            
+            
+                //$em->flush();
+
+            $client = RedisAdapter::createConnection(
+                'redis://redis:6379'
+            );
+            
+            $cache = new RedisAdapter($client);
+            // The callable will only be executed on a cache miss.
+            $pessoaId = $cache->get($pessoa->getId(), function (ItemInterface $item) use ($pessoa) {
+                $item->expiresAfter(60*4);
+                return $pessoa->getId();
+            });
 
 
             //return $this->json(['mensagem' => 'Criado com sucesso'], 201, ['Location' => "/pessoas/{$pessoa->getId()}"]);
-            header("Location: /pessoas/{$pessoa->getId()}", true, 201);
+            header("Location: /pessoas/{$pessoaId}", true, 201);
             exit;
         } 
         catch(UniqueConstraintViolationException $unqueException) {
@@ -62,14 +76,31 @@ class PessoaController extends AbstractController
             return $this->json(['mensagem' => 'Payload não é um Json.'], 400);
         }
         catch(Exception $e) {
-            return $this->json(['mensagem' => 'Payload inválido.'], 422);
+            return $this->json(['mensagem' => "Payload inválido"], 422);
         }
     }
 
     #[Route('/pessoas/{id}', name: 'app_consulta_pessoa')]
     public function consutaPessoaById(string $id, PessoaRepository $pessoaRepository): JsonResponse
     {
-       // return $this->json([], 200);
+        $client = RedisAdapter::createConnection(
+            'redis://redis:6379'
+        );
+        
+        $cache = new RedisAdapter($client);
+       
+            
+            // The callable will only be executed on a cache miss.
+            $pessoaId = $cache->get($id, function (ItemInterface $item) use ($id, $pessoaRepository) : string {
+                $item->expiresAfter(60*4);
+
+                $pessoa = $pessoaRepository->find($id);
+                if($pessoa == null) throw new Exception("Pessoa não existe");
+               
+                return $pessoa->getId();
+            });
+        
+            return $this->json(['id' => $pessoaId], 200);
         try {
             $pessoa = $pessoaRepository->find($id);
             if($pessoa == null) throw new Exception("Pessoa não existe");
